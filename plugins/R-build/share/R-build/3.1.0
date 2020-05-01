@@ -1,0 +1,2 @@
+#require_gcc
+install_package "R-3.1.0" "https://cran.r-project.org/src/base/R-3/R-3.1.0.tar.gz#8a680390f84c58c01dcdefd682eaa0e90389f09e6d2f2e090c71af40065f5fe2" ldflags_dirs standard

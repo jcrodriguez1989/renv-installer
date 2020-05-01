@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+#
+# Summary: Display the full path to an executable
+#
+# Usage: renv which <command>
+#
+# Displays the full path to the executable that renv will invoke when
+# you run the given command.
+#
+
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+# Provide renv completions
+if [ "$1" = "--complete" ]; then
+  exec renv-shims --short
+fi
+
+remove_from_path() {
+  local path_to_remove="$1"
+  local path_before
+  local result=":${PATH//\~/$HOME}:"
+  while [ "$path_before" != "$result" ]; do
+    path_before="$result"
+    result="${result//:$path_to_remove:/:}"
+  done
+  result="${result%:}"
+  echo "${result#:}"
+}
+
+RENV_COMMAND="$1"
+
+if [ -z "$RENV_COMMAND" ]; then
+  renv-help --usage which >&2
+  exit 1
+fi
+
+OLDIFS="$IFS"
+IFS=: versions=(${RENV_VERSION:-$(renv-version-name)})
+IFS="$OLDIFS"
+
+for version in "${versions[@]}"; do
+  if [ "$version" = "system" ]; then
+    PATH="$(remove_from_path "${RENV_ROOT}/shims")"
+    RENV_COMMAND_PATH="$(command -v "$RENV_COMMAND" || true)"
+  else
+    RENV_COMMAND_PATH="${RENV_ROOT}/versions/${version}/bin/${RENV_COMMAND}"
+  fi
+  if [ -x "$RENV_COMMAND_PATH" ]; then
+    break
+  fi
+done
+
+OLDIFS="$IFS"
+IFS=$'\n' scripts=(`renv-hooks which`)
+IFS="$OLDIFS"
+for script in "${scripts[@]}"; do
+  source "$script"
+done
+
+if [ -x "$RENV_COMMAND_PATH" ]; then
+  echo "$RENV_COMMAND_PATH"
+else
+  any_not_installed=0
+  for version in "${versions[@]}"; do
+    if [ "$version" = "system" ]; then
+      continue
+    fi
+    if ! [ -d "${RENV_ROOT}/versions/${version}" ]; then
+      echo "renv: version \`$version' is not installed (set by $(renv-version-origin))" >&2
+      any_not_installed=1
+    fi
+  done
+  if [ "$any_not_installed" = 1 ]; then
+    exit 1
+  fi
+
+  echo "renv: $RENV_COMMAND: command not found" >&2
+
+  versions="$(renv-whence "$RENV_COMMAND" || true)"
+  if [ -n "$versions" ]; then
+    { echo
+      echo "The \`$1' command exists in these R versions:"
+      echo "$versions" | sed 's/^/  /g'
+      echo
+      echo "Note: See 'renv help global' for tips on allowing both"
+      echo "      R2 and R3 to be found."
+    } >&2
+  fi
+
+  exit 127
+fi

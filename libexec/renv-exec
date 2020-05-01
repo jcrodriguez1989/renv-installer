@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#
+# Summary: Run an executable with the selected R version
+#
+# Usage: renv exec <command> [arg1 arg2...]
+#
+# Runs an executable by first preparing PATH so that the selected R
+# version's `bin' directory is at the front.
+#
+# For example, if the currently selected R version is 2.7.6:
+#   renv exec pip install -rrequirements.txt
+#
+# is equivalent to:
+#   PATH="$RENV_ROOT/versions/2.7.6/bin:$PATH" pip install -rrequirements.txt
+
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+# Provide renv completions
+if [ "$1" = "--complete" ]; then
+  exec renv-shims --short
+fi
+
+RENV_VERSION="$(renv-version-name)"
+RENV_COMMAND="$1"
+
+if [ -z "$RENV_COMMAND" ]; then
+  renv-help --usage exec >&2
+  exit 1
+fi
+
+export RENV_VERSION
+RENV_COMMAND_PATH="$(renv-which "$RENV_COMMAND")"
+RENV_BIN_PATH="${RENV_COMMAND_PATH%/*}"
+
+OLDIFS="$IFS"
+IFS=$'\n' scripts=(`renv-hooks exec`)
+IFS="$OLDIFS"
+for script in "${scripts[@]}"; do
+  source "$script"
+done
+
+shift 1
+if [ "${RENV_BIN_PATH#${RENV_ROOT}}" != "${RENV_BIN_PATH}" ]; then
+  # Only add to $PATH for non-system version.
+  export PATH="${RENV_BIN_PATH}:${PATH}"
+fi
+exec "$RENV_COMMAND_PATH" "$@"
