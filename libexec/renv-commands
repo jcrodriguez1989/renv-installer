@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Summary: List all available pyenv commands
-# Usage: pyenv commands [--sh|--no-sh]
+# Summary: List all available renv commands
+# Usage: renv commands [--sh|--no-sh]
 
 set -e
-[ -n "$PYENV_DEBUG" ] && set -x
+[ -n "$RENV_DEBUG" ] && set -x
 
-# Provide pyenv completions
+# Provide renv completions
 if [ "$1" = "--complete" ]; then
   echo --sh
   echo --no-sh
@@ -25,8 +25,8 @@ IFS=: paths=($PATH)
 shopt -s nullglob
 
 { for path in "${paths[@]}"; do
-    for command in "${path}/pyenv-"*; do
-      command="${command##*pyenv-}"
+    for command in "${path}/renv-"*; do
+      command="${command##*renv-}"
       if [ -n "$sh" ]; then
         if [ "${command:0:3}" = "sh-" ]; then
           echo "${command##sh-}"

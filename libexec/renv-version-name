@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Summary: Show the current Python version
+# Summary: Show the current R version
 set -e
 [ -n "$RENV_DEBUG" ] && set -x
 

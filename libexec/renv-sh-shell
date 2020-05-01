@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+#
+# Summary: Set or show the shell-specific R version
+#
+# Usage: renv shell <version>...
+#        renv shell -
+#        renv shell --unset
+#
+# Sets a shell-specific R version by setting the `RENV_VERSION'
+# environment variable in your shell. This version overrides local
+# application-specific versions and the global version.
+#
+# <version> should be a string matching an R version known to renv.
+# The special version string `system' will use your default system R.
+# Run `renv versions' for a list of available R versions.
+#
+# When `-` is passed instead of the version string, the previously set
+# version will be restored. With `--unset`, the `RENV_VERSION`
+# environment variable gets unset, restoring the environment to the
+# state before the first `renv shell` call.
+
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+# Provide renv completions
+if [ "$1" = "--complete" ]; then
+  echo --unset
+  echo system
+  exec renv-versions --bare
+fi
+
+versions=("$@")
+shell="$(basename "${RENV_SHELL:-$SHELL}")"
+
+if [ -z "$versions" ]; then
+  if [ -z "$RENV_VERSION" ]; then
+    echo "renv: no shell-specific version configured" >&2
+    exit 1
+  else
+    echo 'echo "$RENV_VERSION"'
+    exit
+  fi
+fi
+
+if [ "$versions" = "--unset" ]; then
+  case "$shell" in
+  fish )
+    echo 'set -gu RENV_VERSION_OLD "$RENV_VERSION"'
+    echo "set -e RENV_VERSION"
+    ;;
+  * )
+    echo 'RENV_VERSION_OLD="$RENV_VERSION"'
+    echo "unset RENV_VERSION"
+    ;;
+  esac
+  exit
+fi
+
+if [ "$versions" = "-" ]; then
+  case "$shell" in
+  fish )
+    cat <<EOS
+if set -q RENV_VERSION_OLD
+  if [ -n "\$RENV_VERSION_OLD" ]
+    set RENV_VERSION_OLD_ "\$RENV_VERSION"
+    set -gx RENV_VERSION "\$RENV_VERSION_OLD"
+    set -gu RENV_VERSION_OLD "\$RENV_VERSION_OLD_"
+    set -e RENV_VERSION_OLD_
+  else
+    set -gu RENV_VERSION_OLD "\$RENV_VERSION"
+    set -e RENV_VERSION
+  end
+else
+  echo "renv: RENV_VERSION_OLD is not set" >&2
+  false
+end
+EOS
+    ;;
+  * )
+    cat <<EOS
+if [ -n "\${RENV_VERSION_OLD+x}" ]; then
+  if [ -n "\$RENV_VERSION_OLD" ]; then
+    RENV_VERSION_OLD_="\$RENV_VERSION"
+    export RENV_VERSION="\$RENV_VERSION_OLD"
+    RENV_VERSION_OLD="\$RENV_VERSION_OLD_"
+    unset RENV_VERSION_OLD_
+  else
+    RENV_VERSION_OLD="\$RENV_VERSION"
+    unset RENV_VERSION
+  fi
+else
+  echo "renv: RENV_VERSION_OLD is not set" >&2
+  false
+fi
+EOS
+    ;;
+  esac
+  exit
+fi
+
+# Make sure the specified version is installed.
+if renv-prefix "${versions[@]}" >/dev/null; then
+  OLDIFS="$IFS"
+  IFS=: version="${versions[*]}"
+  IFS="$OLDIFS"
+  if [ "$version" != "$RENV_VERSION" ]; then
+    case "$shell" in
+    fish )
+      echo 'set -gu RENV_VERSION_OLD "$RENV_VERSION"'
+      echo "set -gx RENV_VERSION \"$version\""
+      ;;
+    * )
+      echo 'RENV_VERSION_OLD="$RENV_VERSION"'
+      echo "export RENV_VERSION=\"${version}\""
+      ;;
+    esac
+  fi
+else
+  echo "false"
+  exit 1
+fi

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Summary: Install a Python version using R-build
+# Summary: Install an R version using R-build
 #
 # Usage: renv install [-f] [-kvp] <version>
 #        renv install [-f] [-kvp] <definition-file>
@@ -20,7 +20,7 @@
 #   --version          Show version of R-build
 #   -g/--debug         Build a debug version
 #
-# For detailed information on installing Python versions with
+# For detailed information on installing R versions with
 # R-build, including a list of environment variables for adjusting
 # compilation, see: https://github.com/renv/renv#readme
 #
@@ -186,8 +186,8 @@ fi
 if [ -z "${RENV_BOOTSTRAP_VERSION}" ]; then
   case "${VERSION_NAME}" in
   [23]"."* )
-    # Default RENV_VERSION to the friendly Python version. (The
-    # CPython installer requires an existing Python installation to run. An
+    # Default RENV_VERSION to the friendly R version. (The
+    # CR installer requires an existing R installation to run. An
     # unsatisfied local .R-version file can cause the installer to
     # fail.)
     for version_info in "${VERSION_NAME%-dev}" "${VERSION_NAME%.*}" "${VERSION_NAME%%.*}"; do
@@ -201,7 +201,7 @@ if [ -z "${RENV_BOOTSTRAP_VERSION}" ]; then
     done
     ;;
   "pypy"*"-dev" | "pypy"*"-src" )
-    # PyPy/PyPy3 requires existing Python 2.7 to build
+    # PyPy/PyPy3 requires existing R 2.7 to build
     if [ -n "${RENV_RR_VERSION}" ]; then
       RENV_BOOTSTRAP_VERSION="${RENV_RR_VERSION}"
     else
@@ -220,7 +220,7 @@ if [ -z "${RENV_BOOTSTRAP_VERSION}" ]; then
         fi
       done
     else
-      echo "renv-install: $VERSION_NAME: PyPy requires Python 2.7 to build from source." >&2
+      echo "renv-install: $VERSION_NAME: PyPy requires R 2.7 to build from source." >&2
       exit 1
     fi
     ;;
