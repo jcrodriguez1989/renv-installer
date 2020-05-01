@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Summary: Show the current Python version
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+if [ -z "$RENV_VERSION" ]; then
+  RENV_VERSION_FILE="$(renv-version-file)"
+  RENV_VERSION="$(renv-version-file-read "$RENV_VERSION_FILE" || true)"
+fi
+
+OLDIFS="$IFS"
+IFS=$'\n' scripts=(`renv-hooks version-name`)
+IFS="$OLDIFS"
+for script in "${scripts[@]}"; do
+  source "$script"
+done
+
+if [ -z "$RENV_VERSION" ] || [ "$RENV_VERSION" = "system" ]; then
+  echo "system"
+  exit
+fi
+
+version_exists() {
+  local version="$1"
+  [ -d "${RENV_ROOT}/versions/${version}" ]
+}
+
+versions=()
+OLDIFS="$IFS"
+{ IFS=:
+  any_not_installed=0
+  for version in ${RENV_VERSION}; do
+    if version_exists "$version" || [ "$version" = "system" ]; then
+      versions=("${versions[@]}" "${version}")
+    elif version_exists "${version#R-}"; then
+      versions=("${versions[@]}" "${version#R-}")
+    else
+      echo "renv: version \`$version' is not installed (set by $(renv-version-origin))" >&2
+      any_not_installed=1
+    fi
+  done
+}
+IFS="$OLDIFS"
+
+OLDIFS="$IFS"
+{ IFS=:
+  echo "${versions[*]}"
+}
+IFS="$OLDIFS"
+
+if [ "$any_not_installed" = 1 ]; then
+  exit 1
+fi

@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+set -e
+
+if [ "$1" = "--debug" ]; then
+  export RENV_DEBUG=1
+  shift
+fi
+
+if [ -n "$RENV_DEBUG" ]; then
+  export PS4='+ [${BASH_SOURCE##*/}:${LINENO}] '
+  set -x
+fi
+
+abort() {
+  { if [ "$#" -eq 0 ]; then cat -
+    else echo "renv: $*"
+    fi
+  } >&2
+  exit 1
+}
+
+if enable -f "${BASH_SOURCE%/*}"/../libexec/renv-realpath.dylib realpath 2>/dev/null; then
+  abs_dirname() {
+    local path
+    path="$(realpath "$1")"
+    echo "${path%/*}"
+  }
+else
+  [ -z "$RENV_NATIVE_EXT" ] || abort "failed to load \`realpath' builtin"
+
+  READLINK=$(type -p greadlink readlink | head -1)
+  [ -n "$READLINK" ] || abort "cannot find readlink - are you missing GNU coreutils?"
+
+  resolve_link() {
+    $READLINK "$1"
+  }
+
+  abs_dirname() {
+    local path="$1"
+
+    # Use a subshell to avoid changing the current path
+    (
+    while [ -n "$path" ]; do
+      cd_path="${path%/*}"
+      if [[ "$cd_path" != "$path" ]]; then
+        cd "$cd_path"
+      fi
+      name="${path##*/}"
+      path="$(resolve_link "$name" || true)"
+    done
+
+    echo "$PWD"
+    )
+  }
+fi
+
+if [ -z "${RENV_ROOT}" ]; then
+  RENV_ROOT="${HOME}/.renv"
+else
+  RENV_ROOT="${RENV_ROOT%/}"
+fi
+export RENV_ROOT
+
+# Transfer RENV_FILE_ARG (from shims) into RENV_DIR.
+if [ -z "${RENV_DIR}" ]; then
+  if [ -n "${RENV_FILE_ARG}" ]; then
+    if [ -L "${RENV_FILE_ARG}" ]; then
+      RENV_DIR="$(abs_dirname "${RENV_FILE_ARG}")"
+    else
+      RENV_DIR="${RENV_FILE_ARG%/*}"
+    fi
+    export RENV_DIR
+    unset RENV_FILE_ARG
+  fi
+else
+  [[ $RENV_DIR == /* ]] || RENV_DIR="$PWD/$RENV_DIR"
+  cd "$RENV_DIR" 2>/dev/null || abort "cannot change working directory to \`$RENV_DIR'"
+  RENV_DIR="$PWD"
+  cd "$OLDPWD"
+fi
+
+if [ -z "${RENV_DIR}" ]; then
+  RENV_DIR="$PWD"
+fi
+
+if [ ! -d "$RENV_DIR" ] || [ ! -e "$RENV_DIR" ]; then
+  abort "cannot change working directory to \`$RENV_DIR'"
+fi
+
+RENV_DIR=$(cd "$RENV_DIR" && echo "$PWD")
+export RENV_DIR
+
+
+shopt -s nullglob
+
+bin_path="$(abs_dirname "$0")"
+for plugin_bin in "${RENV_ROOT}/plugins/"*/bin; do
+  PATH="${plugin_bin}:${PATH}"
+done
+export PATH="${bin_path}:${PATH}"
+
+RENV_HOOK_PATH="${RENV_HOOK_PATH}:${RENV_ROOT}/renv.d"
+if [ "${bin_path%/*}" != "$RENV_ROOT" ]; then
+  # Add renv's own `renv.d` unless renv was cloned to RENV_ROOT
+  RENV_HOOK_PATH="${RENV_HOOK_PATH}:${bin_path%/*}/renv.d"
+fi
+RENV_HOOK_PATH="${RENV_HOOK_PATH}:/usr/local/etc/renv.d:/etc/renv.d:/usr/lib/renv/hooks"
+for plugin_hook in "${RENV_ROOT}/plugins/"*/etc/renv.d; do
+  RENV_HOOK_PATH="${RENV_HOOK_PATH}:${plugin_hook}"
+done
+RENV_HOOK_PATH="${RENV_HOOK_PATH#:}"
+export RENV_HOOK_PATH
+
+shopt -u nullglob
+
+
+command="$1"
+case "$command" in
+"" )
+  { renv---version
+    renv-help
+  } | abort
+  ;;
+-v | --version )
+  exec renv---version
+  ;;
+-h | --help )
+  exec renv-help
+  ;;
+* )
+  command_path="$(command -v "renv-$command" || true)"
+  if [ -z "$command_path" ]; then
+    if [ "$command" == "shell" ]; then
+      abort "shell integration not enabled. Run \`renv init' for instructions."
+    else
+      abort "no such command \`$command'"
+    fi
+  fi
+
+  shift 1
+  if [ "$1" = --help ]; then
+    if [[ "$command" == "sh-"* ]]; then
+      echo "renv help \"$command\""
+    else
+      exec renv-help "$command"
+    fi
+  else
+    exec "$command_path" "$@"
+  fi
+  ;;
+esac

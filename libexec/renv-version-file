@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Usage: renv version-file [<dir>]
+# Summary: Detect the file that sets the current renv version
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+target_dir="$1"
+
+find_local_version_file() {
+  local root="$1"
+  while ! [[ "$root" =~ ^//[^/]*$ ]]; do
+    if [ -f "${root}/.R-version" ]; then
+      echo "${root}/.R-version"
+      return 0
+    fi
+    [ -n "$root" ] || break
+    root="${root%/*}"
+  done
+  return 1
+}
+
+if [ -n "$target_dir" ]; then
+  find_local_version_file "$target_dir"
+else
+  find_local_version_file "$RENV_DIR" || {
+    [ "$RENV_DIR" != "$PWD" ] && find_local_version_file "$PWD"
+  } || echo "${RENV_ROOT}/version"
+fi
