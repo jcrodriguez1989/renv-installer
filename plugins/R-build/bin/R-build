@@ -745,6 +745,22 @@ build_package_ldflags_dirs() {
   done
 }
 
+build_package_enable_memory_profiling() {
+    package_option R configure --enable-memory-profiling
+}
+
+build_package_enable_R_shlib() {
+    package_option R configure --enable-R-shlib
+}
+
+build_package_with_blas() {
+    package_option R configure --with-blas
+}
+
+build_package_with_lapack() {
+    package_option R configure --with-lapack
+}
+
 apply_R_patch() {
   local patchfile
   case "$1" in
