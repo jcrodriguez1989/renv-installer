@@ -22,7 +22,7 @@
 #
 # For detailed information on installing R versions with
 # R-build, including a list of environment variables for adjusting
-# compilation, see: https://github.com/renv/renv#readme
+# compilation, see: https://github.com/jcrodriguez1989/renv-installer#readme
 #
 set -e
 [ -n "$RENV_DEBUG" ] && set -x

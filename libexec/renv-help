@@ -156,7 +156,7 @@ if [ -z "$1" ] || [ "$1" == "renv" ]; then
   print_summaries $(exec renv-commands | sort -u)
   echo
   echo "See \`renv help <command>' for information on a specific command."
-  echo "For full documentation, see: https://github.com/renv/renv#readme"
+  echo "For full documentation, see: https://github.com/jcrodriguez1989/renv-installer#readme"
 else
   command="$1"
   if [ -n "$(command_path "$command")" ]; then
