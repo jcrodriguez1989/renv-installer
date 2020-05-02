@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+#
+# Summary: Set or show the global R version(s)
+#
+# Usage: renv global <version> <version2> <..>
+#
+# Sets the global R version(s). You can override the global version at
+# any time by setting a directory-specific version with `renv local'
+# or by setting the `RENV_VERSION' environment variable.
+#
+# <version> can be specified multiple times and should be a version
+# tag known to renv.  The special version string `system' will use
+# your default system R.  Run `renv versions' for a list of
+# available R versions.
+#
+# Example: To enable the R-3.0.0 and R-4.0.0 shims to find their
+#          respective executables you could set both versions with:
+#
+# 'renv global 3.0.0 4.0.0'
+#
+
+
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+# Provide renv completions
+if [ "$1" = "--complete" ]; then
+  echo system
+  exec renv-versions --bare
+fi
+
+versions=("$@")
+RENV_VERSION_FILE="${RENV_ROOT}/version"
+
+if [ -n "$versions" ]; then
+  renv-version-file-write "$RENV_VERSION_FILE" "${versions[@]}"
+else
+  OLDIFS="$IFS"
+  IFS=: versions=($(
+    renv-version-file-read "$RENV_VERSION_FILE" ||
+    renv-version-file-read "${RENV_ROOT}/global" ||
+    renv-version-file-read "${RENV_ROOT}/default" ||
+    echo system
+  ))
+  IFS="$OLDIFS"
+  for version in "${versions[@]}"; do
+    echo "$version"
+  done
+fi

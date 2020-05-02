@@ -82,9 +82,6 @@ else
     { echo
       echo "The \`$1' command exists in these R versions:"
       echo "$versions" | sed 's/^/  /g'
-      echo
-      echo "Note: See 'renv help global' for tips on allowing both"
-      echo "      R2 and R3 to be found."
     } >&2
   fi
 
