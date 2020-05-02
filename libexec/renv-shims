@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Summary: List existing renv shims
+# Usage: renv shims [--short]
+
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+# Provide renv completions
+if [ "$1" = "--complete" ]; then
+  echo --short
+  exit
+fi
+
+shopt -s nullglob
+
+for command in "${RENV_ROOT}/shims/"*; do
+  if [ "$1" = "--short" ]; then
+    echo "${command##*/}"
+  else
+    echo "$command"
+  fi
+done | sort

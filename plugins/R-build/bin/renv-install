@@ -184,47 +184,16 @@ if [ -z "${R_BUILD_CACHE_PATH}" ] && [ -d "${RENV_ROOT}/cache" ]; then
 fi
 
 if [ -z "${RENV_BOOTSTRAP_VERSION}" ]; then
-  case "${VERSION_NAME}" in
-  [23]"."* )
-    # Default RENV_VERSION to the friendly R version. (The
-    # CR installer requires an existing R installation to run. An
-    # unsatisfied local .R-version file can cause the installer to
-    # fail.)
-    for version_info in "${VERSION_NAME%-dev}" "${VERSION_NAME%.*}" "${VERSION_NAME%%.*}"; do
-      # Anaconda's `curl` doesn't work on platform where `/etc/pki/tls/certs/ca-bundle.crt` isn't available (e.g. Debian)
-      for version in $(renv-whence "R${version_info}" 2>/dev/null || true); do
-        if [[ "${version}" != "anaconda"* ]] && [[ "${version}" != "miniconda"* ]]; then
-          RENV_BOOTSTRAP_VERSION="${version}"
-          break 2
-        fi
-      done
+  # Default RENV_VERSION to the friendly R version. (The
+  # CR installer requires an existing R installation to run. An
+  # unsatisfied local .R-version file can cause the installer to
+  # fail.)
+  for version_info in "${VERSION_NAME%-dev}" "${VERSION_NAME%.*}" "${VERSION_NAME%%.*}"; do
+    for version in $(renv-whence "R${version_info}" 2>/dev/null || true); do
+      RENV_BOOTSTRAP_VERSION="${version}"
+      break 2
     done
-    ;;
-  "pypy"*"-dev" | "pypy"*"-src" )
-    # PyPy/PyPy3 requires existing R 2.7 to build
-    if [ -n "${RENV_RR_VERSION}" ]; then
-      RENV_BOOTSTRAP_VERSION="${RENV_RR_VERSION}"
-    else
-      for version in $(renv-versions --bare | sort -r); do
-        if [[ "${version}" == "2.7"* ]]; then
-          RENV_BOOTSTRAP_VERSION="$version"
-          break
-        fi
-      done
-    fi
-    if [ -n "$RENV_BOOTSTRAP_VERSION" ]; then
-      for dep in curses genc pycparser; do
-        if ! RENV_VERSION="$RENV_BOOTSTRAP_VERSION" renv-exec R -c "import ${dep}" 1>/dev/null 2>&1; then
-          echo "renv-install: $VERSION_NAME: PyPy requires \`${dep}' in $RENV_BOOTSTRAP_VERSION to build from source." >&2
-          exit 1
-        fi
-      done
-    else
-      echo "renv-install: $VERSION_NAME: PyPy requires R 2.7 to build from source." >&2
-      exit 1
-    fi
-    ;;
-  esac
+  done
 fi
 
 if [ -n "${RENV_BOOTSTRAP_VERSION}" ]; then

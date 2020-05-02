@@ -7,11 +7,11 @@
 # Runs an executable by first preparing PATH so that the selected R
 # version's `bin' directory is at the front.
 #
-# For example, if the currently selected R version is 2.7.6:
-#   renv exec pip install -rrequirements.txt
+# For example, if the currently selected R version is 3.0.0:
+#   renv exec Rscript -e 'install.packages("renv")'
 #
 # is equivalent to:
-#   PATH="$RENV_ROOT/versions/2.7.6/bin:$PATH" pip install -rrequirements.txt
+#   PATH="$RENV_ROOT/versions/3.0.0/bin:$PATH" Rscript -e 'install.packages("renv")'
 
 set -e
 [ -n "$RENV_DEBUG" ] && set -x
