@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Summary: List all R versions that contain the given executable
+# Usage: renv whence [--path] <command>
+
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+# Provide renv completions
+if [ "$1" = "--complete" ]; then
+  echo --path
+  exec renv-shims --short
+fi
+
+if [ "$1" = "--path" ]; then
+  print_paths="1"
+  shift
+else
+  print_paths=""
+fi
+
+whence() {
+  local command="$1"
+  renv-versions --bare | while read -r version; do
+    path="$(renv-prefix "$version")/bin/${command}"
+    if [ -x "$path" ]; then
+      [ "$print_paths" ] && echo "$path" || echo "$version"
+    fi
+  done
+}
+
+RENV_COMMAND="$1"
+if [ -z "$RENV_COMMAND" ]; then
+  renv-help --usage whence >&2
+  exit 1
+fi
+
+result="$(whence "$RENV_COMMAND")"
+[ -n "$result" ] && echo "$result"
