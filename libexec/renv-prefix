@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Summary: Display prefix for an R version
+# Usage: renv prefix [<version>]
+#
+# Displays the directory where an R version is installed. If no
+# version is given, `renv prefix' displays the location of the
+# currently selected version.
+
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+# Provide renv completions
+if [ "$1" = "--complete" ]; then
+  echo system
+  exec renv-versions --bare
+fi
+
+if [ -n "$1" ]; then
+  OLDIFS="$IFS"
+  { IFS=:
+    export RENV_VERSION="$*"
+  }
+  IFS="$OLDIFS"
+elif [ -z "$RENV_VERSION" ]; then
+  RENV_VERSION="$(renv-version-name)"
+fi
+
+RENV_PREFIX_PATHS=()
+OLDIFS="$IFS"
+{ IFS=:
+  for version in ${RENV_VERSION}; do
+    if [ "$version" = "system" ]; then
+      if R_PATH="$(RENV_VERSION="${version}" renv-which R 2>/dev/null)"; then
+        RENV_PREFIX_PATH="${R_PATH%/bin/*}"
+        RENV_PREFIX_PATH="${RENV_PREFIX_PATH:-/}"
+      else
+        echo "renv: system version not found in PATH" >&2
+        exit 1
+      fi
+    else
+      RENV_PREFIX_PATH="${RENV_ROOT}/versions/${version}"
+    fi
+    if [ -d "$RENV_PREFIX_PATH" ]; then
+      RENV_PREFIX_PATHS=("${RENV_PREFIX_PATHS[@]}" "$RENV_PREFIX_PATH")
+    else
+      echo "renv: version \`${version}' not installed" >&2
+      exit 1
+    fi
+  done
+}
+IFS="$OLDIFS"
+
+OLDIFS="$IFS"
+{ IFS=:
+  echo "${RENV_PREFIX_PATHS[*]}"
+}
+IFS="$OLDIFS"
