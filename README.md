@@ -77,19 +77,19 @@ When you execute a shim, renv determines which R version to use by
 reading it from the following sources, in this order:
 
 1. The `RENV_VERSION` environment variable (if specified). You can use
-   the [`renv shell`](https://github.com/pyenv/pyenv/blob/master/COMMANDS.md#renv-shell) command to set this environment
+   the [`renv shell`](https://github.com/jcrodriguez1989/renv-installer/blob/master/COMMANDS.md#renv-shell) command to set this environment
    variable in your current shell session.
 
 2. The application-specific `.R-version` file in the current
    directory (if present). You can modify the current directory's
-   `.R-version` file with the [`renv local`](https://github.com/pyenv/pyenv/blob/master/COMMANDS.md#renv-local)
+   `.R-version` file with the [`renv local`](https://github.com/jcrodriguez1989/renv-installer/blob/master/COMMANDS.md#renv-local)
    command.
 
 3. The first `.R-version` file found (if any) by searching each parent
    directory, until reaching the root of your filesystem.
 
 4. The global `$(renv root)/version` file. You can modify this file using
-   the [`renv global`](https://github.com/pyenv/pyenv/blob/master/COMMANDS.md#renv-global) command. If the global version
+   the [`renv global`](https://github.com/jcrodriguez1989/renv-installer/blob/master/COMMANDS.md#renv-global) command. If the global version
    file is not present, renv assumes you want to use the "system"
    R. (In other words, whatever version would run if renv weren't in your
    `PATH`.)
@@ -298,7 +298,7 @@ You can affect how renv operates with the following settings:
 
 name | default | description
 -----|---------|------------
-`RENV_VERSION` | | Specifies the R version to be used.<br>Also see [`renv shell`](https://github.com/pyenv/pyenv/blob/master/COMMANDS.md#renv-shell)
+`RENV_VERSION` | | Specifies the R version to be used.<br>Also see [`renv shell`](https://github.com/jcrodriguez1989/renv-installer/blob/master/COMMANDS.md#renv-shell)
 `RENV_ROOT` | `~/.renv` | Defines the directory under which R versions and shims reside.<br>Also see `renv root`
 `RENV_DEBUG` | | Outputs debug information.<br>Also as: `renv --debug <subcommand>`
 `RENV_HOOK_PATH` | [_see wiki_][hooks] | Colon-separated list of paths searched for renv hooks.
