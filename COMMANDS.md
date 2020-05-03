@@ -128,7 +128,7 @@ Uninstall a specific R version.
 
 ## `renv sync`
 
-Installs all packages specified in renv.lock.
+Installs all packages specified in `renv.lock` file.
 
     Usage: renv sync
 

@@ -235,7 +235,7 @@ uninstall from the system.
 
 #### Post-installation
 
-Then follow the rest of the post-installation steps under [Basic GitHub Checkout](https://github.com/pyenv/pyenv#basic-github-checkout) above, starting with #3 ("Add `renv init` to your shell to enable shims and autocompletion").
+Then follow the rest of the post-installation steps under [Basic GitHub Checkout](https://github.com/jcrodriguez1989/renv#basic-github-checkout) above, starting with #3 ("Add `renv init` to your shell to enable shims and autocompletion").
 
 ### Advanced Configuration
 
