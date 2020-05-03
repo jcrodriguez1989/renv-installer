@@ -11,6 +11,7 @@ The most common subcommands are:
 * [`renv shell`](#renv-shell)
 * [`renv install`](#renv-install)
 * [`renv uninstall`](#renv-uninstall)
+* [`renv sync`](#renv-sync)
 * [`renv rehash`](#renv-rehash)
 * [`renv version`](#renv-version)
 * [`renv versions`](#renv-versions)
@@ -123,6 +124,13 @@ Uninstall a specific R version.
        -f  Attempt to remove the specified version without prompting
            for confirmation. If the version does not exist, do not
            display an error message.
+
+
+## `renv sync`
+
+Installs all packages specified in renv.lock.
+
+    Usage: renv sync
 
 
 ## `renv rehash`
