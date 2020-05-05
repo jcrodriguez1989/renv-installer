@@ -312,6 +312,11 @@ The renv source code is [hosted on
 GitHub](https://github.com/jcrodriguez1989/renv-installer).  It's clean, modular,
 and easy to understand, even if you're not a shell hacker.
 
+Tests are executed using [Bats](https://github.com/bats-core/bats-core):
+
+    $ bats test
+    $ bats/test/<file>.bats
+
 Please feel free to submit pull requests and file bugs on the [issue
 tracker](https://github.com/jcrodriguez1989/renv-installer/issues).
 
