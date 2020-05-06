@@ -1,0 +1,2 @@
+require_gcc
+install_package "R-patched" "https://stat.ethz.ch/R/daily/R-patched.tar.gz" ldflags_dirs enable_memory_profiling enable_R_shlib with_blas with_lapack standard

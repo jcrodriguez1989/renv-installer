@@ -1,0 +1,2 @@
+require_gcc
+install_package "R-latest" "https://cloud.r-project.org/src/base/R-latest.tar.gz" ldflags_dirs enable_memory_profiling enable_R_shlib with_blas with_lapack standard
