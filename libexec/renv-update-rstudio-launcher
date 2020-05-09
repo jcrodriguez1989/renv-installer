@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#
+# Summary: Updates the RStudio launcher file
+#
+# Usage: renv update-rstudio-launcher
+#
+# Updates the RStudio launcher file, to allow executing RStudio with different R installed
+# versions.
+#
+# Note: it creates a `.desktop` file, so it is currently working only with GNOME-based launchers.
+#
+
+set -e
+[ -n "$RENV_DEBUG" ] && set -x
+
+RSTUDIO_LAUNCHER_FILE="/usr/share/applications/rstudio.desktop"
+DEST_LAUNCHER_FOLDER="$HOME/.local/share/applications/"
+
+if test -f "$RSTUDIO_LAUNCHER_FILE"; then
+    # Copy the launcher default file.
+    cp $RSTUDIO_LAUNCHER_FILE $DEST_LAUNCHER_FOLDER
+    DEST_LAUNCHER_FILE=$DEST_LAUNCHER_FOLDER$(basename $RSTUDIO_LAUNCHER_FILE)
+    # Create the 'Actions' field
+    ACTION="Actions="
+    for VERSION in $RENV_ROOT/versions/*; do
+        ACTION=$ACTION"R-"$(basename $VERSION)";"
+    done
+    echo $ACTION >> $DEST_LAUNCHER_FILE
+    echo "" >> $DEST_LAUNCHER_FILE
+
+    RSTUDIO_EXEC_BIN=$(cat $RSTUDIO_LAUNCHER_FILE | grep "Exec=" | tail -n1 | awk '{print $1}' | awk -F = '{print $2}')
+    # RSTUDIO_EXEC_BIN=$(which rstudio)
+
+    for VERSION in $RENV_ROOT/versions/*; do
+        echo "[Desktop Action R-"$(basename $VERSION)"]" >> $DEST_LAUNCHER_FILE
+        echo "Name=Run RStudio with R "$(basename $VERSION) >> $DEST_LAUNCHER_FILE
+        echo "Exec=env RSTUDIO_WHICH_R="$VERSION"/bin/R "$RSTUDIO_EXEC_BIN >> $DEST_LAUNCHER_FILE
+        echo "" >> $DEST_LAUNCHER_FILE
+    done
+else
+    echo "RStudio launcher file not found."
+fi

@@ -12,6 +12,7 @@ The most common subcommands are:
 * [`renv install`](#renv-install)
 * [`renv uninstall`](#renv-uninstall)
 * [`renv sync`](#renv-sync)
+* [`renv update-rstudio-launcher`](#renv-update-rstudio-launcher)
 * [`renv rehash`](#renv-rehash)
 * [`renv version`](#renv-version)
 * [`renv versions`](#renv-versions)
@@ -131,6 +132,16 @@ Uninstall a specific R version.
 Installs all packages specified in `renv.lock` file.
 
     Usage: renv sync
+
+
+## `renv update-rstudio-launcher`
+
+Updates the RStudio launcher file.
+
+    Usage: renv update-rstudio-launcher
+
+Updates the RStudio launcher file, to allow executing RStudio with different R installed versions.
+Note: it creates a `.desktop` file, so it is currently working only with GNOME-based launchers.
 
 
 ## `renv rehash`

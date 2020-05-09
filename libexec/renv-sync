@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Summary: Installs all packages specified in renv.lock.
+# Summary: Installs all packages specified in `renv.lock` file
 # Usage: renv sync
 #
 
