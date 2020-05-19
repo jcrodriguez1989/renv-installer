@@ -23,6 +23,15 @@ else
         echo $r_version > .R-version
         R -e 'install.packages("renv", repos = "https://cloud.r-project.org"); renv::restore()'
     else
-        echo "ERROR: required R version not installed, or malformed renv.lock"
+        echo "renv.lock file requires R "$r_version" to be installed."
+        read -p "Do you want to install it? [Y/n] " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Nn]$ ]]; then
+            echo "ERROR: required R version not installed, or malformed renv.lock"
+            exit 1;
+        fi
+        renv install $r_version
+        echo $r_version > .R-version
+        R -e 'install.packages("renv", repos = "https://cloud.r-project.org"); renv::restore()'
     fi
 fi
