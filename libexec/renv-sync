@@ -19,10 +19,12 @@ else
         fi
     done < "renv.lock"
     r_version=$(echo "$line" | cut -d'"' -f4)
-    if [ -d "$RENV_ROOT/versions/$r_version" ]; then 
+    if [ -d "$RENV_ROOT/versions/$r_version" ]; then
+        # If R version is installed, set it as default for this project, and install renv packages.
         echo $r_version > .R-version
         R -e 'install.packages("renv", repos = "https://cloud.r-project.org"); renv::restore()'
     else
+        # Ask if R version should be installed.
         echo "renv.lock file requires R "$r_version" to be installed."
         read -p "Do you want to install it? [Y/n] " -n 1 -r
         echo
@@ -30,6 +32,7 @@ else
             echo "ERROR: required R version not installed, or malformed renv.lock"
             exit 1;
         fi
+        # Install required R version, set it as default for this project, and install renv packages.
         renv install $r_version
         echo $r_version > .R-version
         R -e 'install.packages("renv", repos = "https://cloud.r-project.org"); renv::restore()'
