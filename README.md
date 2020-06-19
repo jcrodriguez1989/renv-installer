@@ -26,6 +26,37 @@ This project was forked from [pyenv](https://github.com/pyenv/pyenv), and modifi
     yourself.
 
 
+### Common usage
+
+#### Install a new R version
+
+From a bash terminal:
+
+``` bash
+# Check available versions to install
+$ renv install --list
+# Install a new R version, 4.0.0 for example
+$ renv install 4.0.0
+# Set it as the local R version to use for the current directory (project)
+$ renv local 4.0.0
+# Start R, and surprise! it is version 4.0.0
+$ R
+```
+
+#### Update RStudio's data to allow working with different R versions
+
+From a bash terminal:
+
+``` bash
+# Check currently installed versions
+$ renv versions
+# Update RStudio's data
+$ renv update-rstudio-launcher
+# And surprise again! Right click your RStudio launcher and start it running any other R version.
+```
+
+![](https://pbs.twimg.com/media/EXwNOcdXgAE-1uo?format=png)
+
 ----
 
 
