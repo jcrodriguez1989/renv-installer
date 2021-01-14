@@ -16,7 +16,7 @@ jobs:
         run: sudo apt-get install curl wget -y
       - name: Update R Versions
         run: |
-          R_VERSION="R-4" # Will work for R-4 versions.
+          R_VERSION="R-4" # Will work for R-4 sub versions.
           BASE_URL="https://cloud.r-project.org/src/base/"$R_VERSION"/"
           echo "Versions listed at "$BASE_URL
           # Get existing sub-versions.
@@ -39,10 +39,11 @@ jobs:
             echo "require_gcc" > plugins/R-build/share/R-build/$VERSION
             echo 'install_package "R-'$VERSION'" "'$BASE_URL$R_SUB_VERSION'#'$SHA'" ldflags_dirs enable_memory_profiling enable_R_shlib with_blas with_lapack standard' >> plugins/R-build/share/R-build/$VERSION
           done
-          rm R_KNOWN_VERSIONS.txt # Delete this temporary file.
+          rm R_KNOWN_VERSIONS.txt R-*.tar.gz # Delete temporary files.
       - name: Commit results
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git commit plugins/R-build/share/R-build/ -m 'Found new R versions' || echo "No changes to commit"
+          git add plugins/R-build/share/R-build/ || echo "No changes to add"
+          git commit -m 'Found new R versions' || echo "No changes to commit"
           git push origin || echo "No changes to commit"
