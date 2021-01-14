@@ -1,8 +1,6 @@
-on: [push, pull_request]
-
-# on:
-#   schedule:
-#     - cron: "0 0 1 * *" # Monthly, first day of each month.
+on:
+  schedule:
+    - cron: "0 0 1 * *" # Monthly, first day of each month.
 
 name: Update R Versions
 
