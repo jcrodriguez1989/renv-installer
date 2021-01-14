@@ -730,6 +730,22 @@ use_homebrew_readline() {
   fi
 }
 
+use_homebrew_zlib() {
+  local brew_zlib="$(brew --prefix zlib 2>/dev/null || true)"
+  if [ -d "$brew_zlib" ]; then
+    echo "R-build: use zlib from homebrew"
+    export CFLAGS="-I${brew_zlib} ${CFLAGS}"
+  fi
+}
+
+use_xcode_sdk_zlib() {
+  local xc_sdk_path="$(xcrun --show-sdk-path 2>/dev/null || true)"
+  if [ -d "$xc_sdk_path" ]; then
+    echo "R-build: use zlib from xcode sdk"
+    export CFLAGS="-I${xc_sdk_path}/usr/include ${CFLAGS}"
+  fi
+}
+
 # Ensure that directories listed in LDFLAGS exist
 build_package_ldflags_dirs() {
   local arg dir
