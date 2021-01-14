@@ -1,0 +1,49 @@
+on: [push, pull_request]
+
+# on:
+#   schedule:
+#     - cron: "0 0 1 * *" # Monthly, first day of each month.
+
+name: Update R Versions
+
+jobs:
+  update_r_versions:
+    name: Update R Versions
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: sudo apt-get install curl wget -y
+      - name: Update R Versions
+        run: |
+          R_VERSION="R-4" # Will work for R-4 sub versions.
+          BASE_URL="https://cloud.r-project.org/src/base/"$R_VERSION"/"
+          echo "Versions listed at "$BASE_URL
+          # Get existing sub-versions.
+          R_SUB_VERSIONS=$(curl --silent $BASE_URL | grep '<a href="R-4' | awk -F '"' '{print $2}')
+          # Get already known versions.
+          ls plugins/R-build/share/R-build/ | cat > R_KNOWN_VERSIONS.txt
+          # For each new version:
+          for R_SUB_VERSION in $R_SUB_VERSIONS; do
+            VERSION=$(echo $R_SUB_VERSION | awk -F "-" '{print $2}' | awk -F ".tar.gz" '{print $1}')
+            if [[ "$VERSION" =~ $(echo ^\($(paste -sd'|' R_KNOWN_VERSIONS.txt)\)$) ]]; then
+              # Version already known.
+              continue
+            fi
+            echo "Downloading $R_SUB_VERSION"
+            # Download tar file.
+            wget --quiet $BASE_URL$R_SUB_VERSION
+            # Calculate file's SHA256.
+            SHA=$(sha256sum $R_SUB_VERSION | awk '{print $1}')
+            # Fill the file metadata.
+            echo "require_gcc" > plugins/R-build/share/R-build/$VERSION
+            echo 'install_package "R-'$VERSION'" "'$BASE_URL$R_SUB_VERSION'#'$SHA'" ldflags_dirs enable_memory_profiling enable_R_shlib with_blas with_lapack standard' >> plugins/R-build/share/R-build/$VERSION
+          done
+          rm R_KNOWN_VERSIONS.txt R-*.tar.gz 2> /dev/null ||: # Delete temporary files.
+      - name: Commit results
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add plugins/R-build/share/R-build/ || echo "No changes to add"
+          git commit -m 'Found new R versions' || echo "No changes to commit"
+          git push origin || echo "No changes to commit"
