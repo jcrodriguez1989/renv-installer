@@ -39,6 +39,7 @@ jobs:
             echo "require_gcc" > plugins/R-build/share/R-build/$VERSION
             echo 'install_package "R-'$VERSION'" "'$BASE_URL$R_SUB_VERSION'#'$SHA'" ldflags_dirs enable_memory_profiling enable_R_shlib with_blas with_lapack standard' >> plugins/R-build/share/R-build/$VERSION
           done
+          rm R_KNOWN_VERSIONS.txt # Delete this temporary file.
       - name: Commit results
         run: |
           git config --local user.email "actions@github.com"
