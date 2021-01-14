@@ -20,7 +20,7 @@ jobs:
           BASE_URL="https://cloud.r-project.org/src/base/"$R_VERSION"/"
           echo "Versions listed at "$BASE_URL
           # Get existing sub-versions.
-          R_SUB_VERSIONS=$(curl $BASE_URL | grep '<a href="R-4' | awk -F '"' '{print $2}')
+          R_SUB_VERSIONS=$(curl --silent $BASE_URL | grep '<a href="R-4' | awk -F '"' '{print $2}')
           # Get already known versions.
           ls plugins/R-build/share/R-build/ | cat > R_KNOWN_VERSIONS.txt
           # For each new version:
@@ -32,7 +32,7 @@ jobs:
             fi
             echo "Downloading $R_SUB_VERSION"
             # Download tar file.
-            wget $BASE_URL$R_SUB_VERSION
+            wget --quiet $BASE_URL$R_SUB_VERSION
             # Calculate file's SHA256.
             SHA=$(sha256sum $R_SUB_VERSION | awk '{print $1}')
             # Fill the file metadata.
