@@ -1,0 +1,2 @@
+require_gcc
+install_package "R-4.3.3.tar.xz" "https://cloud.r-project.org/src/base/R-4/R-4.3.3.tar.xz#9b4c5f4cabab23f38e72fee36d98772c640a97305d06ce6e1a6a73e82b850954" ldflags_dirs enable_memory_profiling enable_R_shlib with_blas with_lapack standard
