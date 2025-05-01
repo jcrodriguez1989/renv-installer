@@ -1,4 +1,5 @@
 on:
+  push:
   schedule:
     - cron: "0 0 1 * *" # Monthly, first day of each month.
 
