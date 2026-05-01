@@ -1,0 +1,2 @@
+require_gcc
+install_package "R-4.6.0" "https://cloud.r-project.org/src/base/R-4/R-4.6.0.tar.gz#b8dc9b4543660c7b596b87938df532394350360976527d344228ee0ed12e45ec" ldflags_dirs enable_memory_profiling enable_R_shlib with_blas with_lapack standard
